@@ -52,7 +52,7 @@ model.fit(
 
 # ============ PHASE 2: Fine-tune MORE of the backbone, MORE epochs ============
 print("\n=== PHASE 2: Fine-tuning backbone (more layers, more epochs) ===")
-unfreeze_top_layers(base, num_layers=60)   # was 20 — now unfreezing much more of MobileNetV2
+unfreeze_top_layers(base, num_layers=60)
 
 model.compile(
     optimizer=tf.keras.optimizers.Adam(1e-5),
@@ -61,7 +61,7 @@ model.compile(
 )
 
 phase2_callbacks = [
-    tf.keras.callbacks.EarlyStopping(patience=8, restore_best_weights=True),  # more patience
+    tf.keras.callbacks.EarlyStopping(patience=8, restore_best_weights=True),
     tf.keras.callbacks.ReduceLROnPlateau(factor=0.5, patience=4, verbose=1),
     tf.keras.callbacks.ModelCheckpoint(
         os.path.join(MODELS_DIR, 'v2_phase2_best.h5'), save_best_only=True
@@ -69,7 +69,7 @@ phase2_callbacks = [
 ]
 
 model.fit(
-    train_gen, validation_data=val_gen, epochs=35,   # was 20 — more room to improve
+    train_gen, validation_data=val_gen, epochs=35,
     class_weight=class_weight_dict, callbacks=phase2_callbacks
 )
 

@@ -13,7 +13,7 @@ RESULTS_DIR = os.path.join(PROJECT_ROOT, 'results')
 os.makedirs(RESULTS_DIR, exist_ok=True)
 
 # --- Load model ---
-model_path = os.path.join(MODELS_DIR, 'emotion_model_final.h5')
+model_path = os.path.join(MODELS_DIR, 'emotion_model_v2.h5')
 model = tf.keras.models.load_model(model_path)
 
 # --- Load val/test data (no shuffle so predictions align with labels) ---
@@ -36,7 +36,7 @@ y_true = val_gen.classes
 report = classification_report(y_true, y_pred, target_names=class_names, digits=3)
 print("\n" + report)
 
-with open(os.path.join(RESULTS_DIR, 'classification_report.txt'), 'w') as f:
+with open(os.path.join(RESULTS_DIR, 'classification_report_v2.txt'), 'w') as f:
     f.write(report)
 
 # --- Confusion matrix ---
@@ -48,8 +48,8 @@ plt.xlabel('Predicted')
 plt.ylabel('True')
 plt.title('Confusion Matrix — Emotion Recognition')
 plt.tight_layout()
-plt.savefig(os.path.join(RESULTS_DIR, 'confusion_matrix.png'), dpi=150)
-print(f"\nConfusion matrix saved to {os.path.join(RESULTS_DIR, 'confusion_matrix.png')}")
+plt.savefig(os.path.join(RESULTS_DIR, 'confusion_matrix_v2.png'), dpi=150)
+print(f"\nConfusion matrix saved to {os.path.join(RESULTS_DIR, 'confusion_matrix_v2.png')}")
 
 # --- Normalized confusion matrix (shows per-class % — easier to read with imbalance) ---
 cm_norm = cm.astype('float') / cm.sum(axis=1, keepdims=True)
@@ -60,5 +60,5 @@ plt.xlabel('Predicted')
 plt.ylabel('True')
 plt.title('Normalized Confusion Matrix (row = true class %)')
 plt.tight_layout()
-plt.savefig(os.path.join(RESULTS_DIR, 'confusion_matrix_normalized.png'), dpi=150)
-print(f"Normalized confusion matrix saved to {os.path.join(RESULTS_DIR, 'confusion_matrix_normalized.png')}")
+plt.savefig(os.path.join(RESULTS_DIR, 'confusion_matrix_normalized_v2.png'), dpi=150)
+print(f"Normalized confusion matrix saved to {os.path.join(RESULTS_DIR, 'confusion_matrix_normalized_v2.png')}")
