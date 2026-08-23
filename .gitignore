@@ -1,0 +1,32 @@
+# Virtual environments
+venv/
+venv-wsl/
+
+# Data (too large for GitHub, downloadable via Kaggle instead)
+data/raw/
+data/processed/
+
+# Trained models (large binary files — consider Git LFS or releases instead)
+models/*.h5
+models/*.keras
+
+# Results (keep small images, ignore large ones if needed)
+results/gradcam/*.png
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.Python
+*.egg-info/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment secrets
+.kaggle/
+*.env
