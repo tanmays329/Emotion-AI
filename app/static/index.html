@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Emotion Recognition — Live Demo</title>
+<style>
+  body {
+    font-family: -apple-system, sans-serif;
+    background: #111;
+    color: #eee;
+    text-align: center;
+    padding: 2rem;
+  }
+  h1 { font-weight: 600; }
+  #container {
+    position: relative;
+    display: inline-block;
+    margin-top: 1rem;
+  }
+  video, canvas {
+    border-radius: 12px;
+    max-width: 90vw;
+  }
+  #overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  #status {
+    margin-top: 1rem;
+    font-size: 1.2rem;
+    min-height: 1.5em;
+  }
+  #startBtn {
+    margin-top: 1rem;
+    padding: 0.7rem 1.5rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: none;
+    background: #4CAF50;
+    color: white;
+    cursor: pointer;
+  }
+  .note { color: #888; font-size: 0.9rem; margin-top: 1rem; }
+</style>
+</head>
+<body>
+
+<h1>Live Emotion Recognition</h1>
+<p class="note">Runs entirely against a live model API. First prediction may be slow if the server was idle.</p>
+
+<button id="startBtn">Start Camera</button>
+
+<div id="container">
+  <video id="video" autoplay playsinline width="480" height="360" style="display:none;"></video>
+  <canvas id="overlay" width="480" height="360" style="display:none;"></canvas>
+</div>
+
+<div id="status"></div>
+
+<script>
+const video = document.getElementById('video');
+const overlay = document.getElementById('overlay');
+const ctx = overlay.getContext('2d');
+const statusEl = document.getElementById('status');
+const startBtn = document.getElementById('startBtn');
+
+let streaming = false;
+
+startBtn.addEventListener('click', async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 480, height: 360 } });
+    video.srcObject = stream;
+    video.style.display = 'block';
+    overlay.style.display = 'block';
+    startBtn.style.display = 'none';
+    streaming = true;
+    statusEl.textContent = 'Warming up model (may take up to a minute if server was idle)...';
+    predictLoop();
+  } catch (err) {
+    statusEl.textContent = 'Camera access denied or unavailable: ' + err.message;
+  }
+});
+
+async function captureFrameAsBlob() {
+  const captureCanvas = document.createElement('canvas');
+  captureCanvas.width = video.videoWidth;
+  captureCanvas.height = video.videoHeight;
+  captureCanvas.getContext('2d').drawImage(video, 0, 0);
+  return new Promise(resolve => captureCanvas.toBlob(resolve, 'image/jpeg', 0.85));
+}
+
+async function predictLoop() {
+  while (streaming) {
+    try {
+      const blob = await captureFrameAsBlob();
+      const formData = new FormData();
+      formData.append('file', blob, 'frame.jpg');
+
+      const res = await fetch('/predict', { method: 'POST', body: formData });
+      const data = await res.json();
+
+      ctx.clearRect(0, 0, overlay.width, overlay.height);
+
+      if (data.faces_detected > 0) {
+        const scaleX = overlay.width / video.videoWidth;
+        const scaleY = overlay.height / video.videoHeight;
+
+        data.results.forEach(r => {
+          const { x1, y1, x2, y2 } = r.bounding_box;
+          const bx = x1 * scaleX, by = y1 * scaleY;
+          const bw = (x2 - x1) * scaleX, bh = (y2 - y1) * scaleY;
+
+          ctx.strokeStyle = '#4CAF50';
+          ctx.lineWidth = 3;
+          ctx.strokeRect(bx, by, bw, bh);
+
+          ctx.fillStyle = '#4CAF50';
+          ctx.font = '20px sans-serif';
+          ctx.fillText(`${r.emotion} (${r.confidence.toFixed(2)})`, bx, by - 8);
+        });
+        statusEl.textContent = `Detected: ${data.results[0].emotion} (${(data.results[0].confidence * 100).toFixed(0)}% confidence)`;
+      } else {
+        statusEl.textContent = 'No face detected';
+      }
+    } catch (err) {
+      statusEl.textContent = 'Prediction error: ' + err.message;
+    }
+    await new Promise(r => setTimeout(r, 800)); // ~1.25 fps — kind to free-tier CPU
+  }
+}
+</script>
+
+</body>
+</html>

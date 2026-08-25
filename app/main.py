@@ -4,6 +4,8 @@ import cv2
 import tensorflow as tf
 import mediapipe as mp
 from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -108,3 +110,11 @@ async def predict(file: UploadFile = File(...)):
         })
 
     return {"faces_detected": len(response_results), "results": response_results}
+
+STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
+
+@app.get("/demo")
+def demo_page():
+    return FileResponse(os.path.join(STATIC_DIR, 'index.html'))
+
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
