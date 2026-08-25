@@ -8,6 +8,7 @@ data/processed/
 
 # Trained models (large binary files — consider Git LFS or releases instead)
 models/*.h5
+!models/emotion_model_v2.h5
 models/*.keras
 
 # Results (keep small images, ignore large ones if needed)
