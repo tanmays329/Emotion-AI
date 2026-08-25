@@ -64,25 +64,6 @@ Input Image → MediaPipe Face Detection → Face Crop (5% padding)
 - **Face detection**: MediaPipe Face Detection
 - **Training**: class-weighted loss to handle FER2013's imbalance (disgust is ~9x rarer than happy)
 
-## Project Structure
-emotion-ai/
-├── src/
-│ ├── model.py # Model architecture
-│ ├── data_loader.py # Data generators + augmentation
-│ ├── train_v2.py # Two-phase training script
-│ ├── evaluate.py # Confusion matrix + classification report
-│ ├── gradcam.py # Grad-CAM explainability
-│ └── webcam_demo.py # Local real-time webcam inference (Python/OpenCV)
-├── app/
-│ ├── main.py # FastAPI backend (+ /demo route)
-│ └── static/
-│ └── index.html # Live in-browser webcam demo
-├── results/ # Evaluation outputs, Grad-CAM images
-├── models/ # Trained model weights (Git LFS)
-├── Dockerfile
-├── requirements.txt # Full deps (training + dev)
-├── requirements-api.txt # Slim deps (deployment only)
-└── README.md
 
 ## Setup
 
